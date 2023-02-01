@@ -29,7 +29,7 @@ export default function SideBar({ currentUser, handleLogout }) {
 	const loggedOut = (
 		<aside className='menu'>
 			<ul className='menu-list'>
-				<li className='has-background-primary'>
+				<li className='has-background-grey'>
 					<Link to="/">
 						<p>Home</p>
 					</Link>

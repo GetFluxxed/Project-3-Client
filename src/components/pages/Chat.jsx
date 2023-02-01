@@ -30,28 +30,23 @@ export default function Chat() {
   const handleSearch = async (e) => {
     e.preventDefault()
     try {
-      const searchFor = await axios.get(`${process.env.REACT_APP_SERVER_URL}chats?search=${search}`)
+      const searchFor = await axios.get(`${process.env.REACT_APP_SERVER_URL}chats?search=${search.toLowerCase()}`)
+      console.log(searchFor.data)
       setShowSearch(!showSearch)
+      console.log(search)
       const searchList = searchFor.data.map((search) => {
         return (
-          <div key={search._id} onClick={() => joinChat(search._id)}>
+          <a className="dropdown-item" key={search._id} onClick={() => joinChat(search._id)}>
             {search.title}
-            {/* <redirect
-          to={{
-          pathname: `/chat-room/${chatRoom}`,
-          state: { }
-          }}
-        /> */}
-          </div>
-
+          </a>
         )
       })
       setList(searchList)
-
     } catch (err) {
       console.warn(err)
     }
   }
+
 
   const joinChat = async (id) => {
     try {
@@ -88,40 +83,30 @@ export default function Chat() {
   });
 
   return (
-    <div className="home">
+    <div className="field is-grouped is-grouped-centered">
       <form onSubmit={handleSearch}>
-        <label htmlFor="search">Search Chat: </label>
-        <input
-          autoComplete="off"
-          id="search"
-          type='text'
-          value={search}
-          placeholder='Look for a chat!'
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button type="submit">Search</button>
-      </form>
-
-      {showSearch ? list : null}
-
-
-      <h1>
-        <strong>{list?.title}</strong>
-      </h1>
-      <p>your comment:</p>
-      {currentUserComments}
-      <p>other user:</p>
-      {otherUserComments}
-      <form onSubmit={message}>
-        <input
-          autoComplete="off"
-          type="text"
-          id="message"
-          placeholder="message ..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
-        <button type='submit' >connect</button>
+        <label className="label title is-1" htmlFor="search">Search Chats</label>
+        <div className="dropdown is-active">
+          <div className="dropdown-trigger">
+            <input
+              className="input"
+              autoComplete="off"
+              id="search"
+              type='text'
+              value={search}
+              placeholder='Look for a chat!'
+              onChange={(e) => setSearch(e.target.value)}
+              required
+            />
+          </div>
+          <div className="dropdown-menu">
+            <div className="dropdown-content">
+              {showSearch ? list : null}
+            </div>
+          </div>
+        </div>
+        <button className="button mx-1" type="submit">Find</button>
+        <button className="button" type='submit' onClick={() => navigate('/chat-form')}>+</button>
       </form>
     </div>
   );
