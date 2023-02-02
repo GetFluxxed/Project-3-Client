@@ -14,27 +14,29 @@ export default function Chat() {
   const [chatRoom, setChatRoom] = useState('')
   let navigate = useNavigate();
 
+  // handler for message
   const message = async (e) => {
     e.preventDefault();
-    console.log(chatRoom);
+    // setting state of message
     setCurrentUserComment([...currentUserComment, comment]);
+    // sending message to backend socket
     socket.emit("send-comment", { comment: currentUserComment, room: chatRoom });
     try {
       const comments = await axios.post(`${process.env.REACT_APP_SERVER_URL}chats/${chatRoom}/comment`, { content: `${comment}` })
-
-      console.log(comments)
     } catch (err) {
       console.log(err)
     }
   };
 
+  // handler for searching for a chat
   const handleSearch = async (e) => {
     e.preventDefault()
     try {
+      // searching for a chat with forced lowercase filter
       const searchFor = await axios.get(`${process.env.REACT_APP_SERVER_URL}chats?search=${search.toLowerCase()}`)
-      console.log(searchFor.data)
+      // setting the state of search
       setShowSearch(!showSearch)
-      console.log(search)
+      // mapping out search into an interactable dropdown menu
       const searchList = searchFor.data.map((search) => {
         return (
           <a className="dropdown-item" key={search._id} onClick={() => joinChat(search._id)}>
@@ -42,6 +44,7 @@ export default function Chat() {
           </a>
         )
       })
+      // updating list state
       setList(searchList)
     } catch (err) {
       navigate('/error')
@@ -49,50 +52,36 @@ export default function Chat() {
     }
   }
 
-
+  // handler for clicking on a search 
   const joinChat = async (id) => {
     try {
+      // joins chat room based on id clicked on
       setChatRoom(id)
+      // communicates with backend
       socket.emit('join-chat', `${id}`)
-      console.log(id)
     } catch (err) {
       console.warn(err)
     }
-    console.log(chatRoom)
     navigate(`/chat-room/${id}`)
   }
 
+  // handler of receiving comments from another user
   useEffect(() => {
     socket.on("receive-comment", (comment) => {
       setOtherUserComment([...otherUserComment, comment.comment]);
     });
   }, []);
 
-  let currentUserComments = currentUserComment.map((comment, idx) => {
-    return (
-      <div key={`comment-${idx}`}>
-        <p>{comment}</p>
-      </div>
-    );
-  });
-
-  let otherUserComments = otherUserComment.map((comment, idx) => {
-    return (
-      <div key={`otherUserComment-${idx}`}>
-        <p>{comment}</p>
-      </div>
-    );
-  });
 
   return (
     <>
       <section className="hero is-large">
         <section className="hero-body is-medium has-background-warning">
-
           <div className="field has-text-centered is-bold">
             <p className="title is-1">Welcome To CHAPPIE</p>
           </div>
           <div className="field is-grouped is-grouped-centered">
+            {/* form for sending a message */}
             <form onSubmit={handleSearch}>
               <label className="label title is-2" htmlFor="search">Search for a Chat</label>
               <div className="dropdown is-active">
@@ -110,6 +99,7 @@ export default function Chat() {
                 </div>
                 <div className="dropdown-menu">
                   <div className="dropdown-content">
+                    {/* rendering list from state */}
                     {showSearch ? list : null}
                   </div>
                 </div>

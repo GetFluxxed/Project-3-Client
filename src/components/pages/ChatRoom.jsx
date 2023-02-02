@@ -10,45 +10,45 @@ export default function ChatRoom(props) {
     let [apiPinged, setApiPinged] = useState(false)
     const [chatName, setChatName] = useState('')
     let [userId, setUserId] = useState('')
-    let {id} = useParams()
+    let { id } = useParams()
     const handleSubmit = async (e) => {
         e.preventDefault()
         // checking that user is logged in if not they will not have access to post 
         if (!props.currentUser) {
             setSendComment('Login to comment')
 
-        }else{
+        } else {
             // sending out a message payload so other users on same room-id can receive it immediately
-            socket.emit('send-comment',{ comment: sendComment, room: id, userName:props.currentUser.name,userId:props.currentUser.id})
-            try{
-                let body={
+            socket.emit('send-comment', { comment: sendComment, room: id, userName: props.currentUser.name, userId: props.currentUser.id })
+            try {
+                let body = {
                     content: sendComment,
                     userName: props.currentUser.name,
                     userId: props.currentUser.id
                 }
                 // makes a post comment request to our API so it can store user messages within chatrooms when you join a new room
-                const send = await axios.post(`${process.env.REACT_APP_SERVER_URL}chats/${id}/comment`,body)
+                const send = await axios.post(`${process.env.REACT_APP_SERVER_URL}chats/${id}/comment`, body)
                 let date = new Date()
                 date = date.toString()
-                let time = date.slice(16,24)
-                date = date.slice(0,15)
-                console.log(time)
+                let time = date.slice(16, 24)
+                date = date.slice(0, 15)
+
                 // date = date
                 // setting up the jsx to display the content of the new post a user sent out
-                let updatedList= 
-                <div key={`new-comment${key}`}>
-                  <p>{sendComment}</p>
-                  <div className="tags has-addons">
-                    <span className="tag is-dark">-{body.userName} </span>
-                    <span className="tag">{date}</span>
-                    <span className="tag is-dark">{time}</span>
-                  </div>
-                </div>
-                let newKey = key+1
+                let updatedList =
+                    <div key={`new-comment${key}`}>
+                        <p>{sendComment}</p>
+                        <div className="tags has-addons">
+                            <span className="tag is-dark">-{body.userName} </span>
+                            <span className="tag">{date}</span>
+                            <span className="tag is-dark">{time}</span>
+                        </div>
+                    </div>
+                let newKey = key + 1
                 setKey(newKey)
                 // updating the comments state so it stores the most up to date messages including the one above
-                let y= []
-                for(let i in comments){
+                let y = []
+                for (let i in comments) {
                     y.push(comments[i])
                 }
                 setComment([...y, updatedList])
@@ -65,24 +65,18 @@ export default function ChatRoom(props) {
             const response = await axios.get(`${process.env.REACT_APP_SERVER_URL}chats/${id}/comment`)
             setChatName(response?.data.title)
             const commentList = response.data.content.map((comment) => {
+                // slicing comment creation date for past comments
                 let date = comment.createdAt
-                date = date.slice(0,10)
-                // let date = new Date(comment.createdAt)
-                // date = date.getTime()
-                // console.log(date.getTime())
-                // date = date.splice()
-                let user 
-                
-                // comment.userId == props.currentUser.id ? user = 'You' : user= comment.userName
+                date = date.slice(0, 10)
+
                 return (
                     <div key={`comment${comment._id}`}>
-
                         <p> {comment.content}</p>
-                    <div className="tags has-addons">
-                        <span className="tag is-dark">-{comment.userName}</span>
-                        <span className="tag">{date}</span>
-                        <span></span>
-                    </div>
+                        <div className="tags has-addons">
+                            <span className="tag is-dark">-{comment.userName}</span>
+                            <span className="tag">{date}</span>
+                            <span></span>
+                        </div>
 
                     </div>
                 )
@@ -103,26 +97,23 @@ export default function ChatRoom(props) {
     useEffect(() => {
         // whenever other users send out messages they are received here immediately and updating state to show the most up to date content
         socket.on('receive-comment', (comment) => {
-            console.log(comment)
+            // slicing date
             let dateNow = new Date()
-            dateNow =dateNow.toString()
-            let currentTime = dateNow.slice(16,24)
-            dateNow = dateNow.toString().slice(0,15)
-
-            console.log(dateNow)
+            dateNow = dateNow.toString()
+            let currentTime = dateNow.slice(16, 24)
+            dateNow = dateNow.toString().slice(0, 15)
             let receiveUpdate = <div key={key}>
-            <p>{comment.comment}</p>
-            <div className="tags has-addons">
-                <span className="tag is-dark">-{comment.userName}</span>
-                <span className="tag">{dateNow}</span>
-                <span className="tag is-dark">{currentTime}</span>
+                <p>{comment.comment}</p>
+                <div className="tags has-addons">
+                    <span className="tag is-dark">-{comment.userName}</span>
+                    <span className="tag">{dateNow}</span>
+                    <span className="tag is-dark">{currentTime}</span>
+                </div>
             </div>
-            </div>
-            let newKey = key+1
+            let newKey = key + 1
             setKey(newKey)
             let x = []
             for (let i in comments) {
-                //console.log(comments[i])
                 x.push(comments[i])
             }
             setComment([...x, receiveUpdate])
@@ -141,6 +132,7 @@ export default function ChatRoom(props) {
                         <div className="field is-grouped is-grouped-centered">
                             <p className="title is-1">{chatName}</p>
                         </div>
+                        {/* rendering based on login status */}
                         {!props.currentUser ? notLoggedIn : null}
                         {apiPinged ? comments : null}
                         <div className="field is-grouped is-grouped-centered">
@@ -154,7 +146,7 @@ export default function ChatRoom(props) {
                                     required
                                 />
                             </form>
-                           <button className="button" onClick={handleSubmit}>Send</button>
+                            <button className="button" onClick={handleSubmit}>Send</button>
                         </div>
                     </div>
                 </div>

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 
 
 export default function SideBar({ currentUser, handleLogout }) {
+	// rendering view based on whether or not user is logged in
 	const loggedIn = (
 		<nav className="navbar is-dark" role="navigation" aria-label="main navigation">
 			<div id="navbarBasicExample" className="navbar-menu">
@@ -22,7 +23,7 @@ export default function SideBar({ currentUser, handleLogout }) {
 			</div>
 		</nav>
 	)
-
+	// rendering view based on whether or not user is logged in
 	const loggedOut = (
 		<nav className="navbar is-light" role="navigation" aria-label="main navigation">
 			<div id="navbarBasicExample" className="navbar-menu">

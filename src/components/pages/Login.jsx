@@ -2,7 +2,6 @@ import { useState } from 'react'
 import axios from 'axios'
 import jwt_decode from 'jwt-decode'
 import { Navigate } from 'react-router-dom'
-import classNames from 'classnames'
 
 export default function Login({ currentUser, setCurrentUser }) {
 	// state for the controlled form
@@ -14,7 +13,7 @@ export default function Login({ currentUser, setCurrentUser }) {
 	const handleSubmit = async e => {
 		e.preventDefault()
 		try {
-			// post fortm data to the backend
+			// post form data to the backend
 			const reqBody = {
 				email,
 				password
