@@ -13,10 +13,12 @@ export default function ChatRoom(props) {
     let {id} = useParams()
     const handleSubmit = async (e) => {
         e.preventDefault()
+        // checking that user is logged in if not they will not have access to post 
         if (!props.currentUser) {
             setSendComment('Login to comment')
 
         }else{
+            // sending out a message payload so other users on same room-id can receive it immediately
             socket.emit('send-comment',{ comment: sendComment, room: id, userName:props.currentUser.name,userId:props.currentUser.id})
             try{
                 let body={
@@ -24,7 +26,7 @@ export default function ChatRoom(props) {
                     userName: props.currentUser.name,
                     userId: props.currentUser.id
                 }
-
+                // makes a post comment request to our API so it can store user messages within chatrooms when you join a new room
                 const send = await axios.post(`${process.env.REACT_APP_SERVER_URL}chats/${id}/comment`,body)
                 let date = new Date()
                 date = date.toString()
@@ -32,6 +34,7 @@ export default function ChatRoom(props) {
                 date = date.slice(0,15)
                 console.log(time)
                 // date = date
+                // setting up the jsx to display the content of the new post a user sent out
                 let updatedList= 
                 <div key={`new-comment${key}`}>
                   <p>{sendComment}</p>
@@ -43,6 +46,7 @@ export default function ChatRoom(props) {
                 </div>
                 let newKey = key+1
                 setKey(newKey)
+                // updating the comments state so it stores the most up to date messages including the one above
                 let y= []
                 for(let i in comments){
                     y.push(comments[i])
@@ -57,6 +61,7 @@ export default function ChatRoom(props) {
     const apiPing = async () => {
         try {
             setUserId(props.currentUser?.id)
+            // on render we want the user message history so we ping our API to get those previous messages and update state
             const response = await axios.get(`${process.env.REACT_APP_SERVER_URL}chats/${id}/comment`)
             setChatName(response?.data.title)
             const commentList = response.data.content.map((comment) => {
@@ -87,20 +92,8 @@ export default function ChatRoom(props) {
             console.log(err)
         }
     }
-    // useEffect(()=>{
-    //     console.log(comments, "uo")
-    //     let list 
-    //     if( comments != null)
-    //     list = comments.map((comment)=>{
-    //         console.log(comment.props)
-    //         return(
-    //             <>
 
-    //             </>
-    //         )
-    //     })
-    // },[comments])
-
+    // whenever the /:id in the browser changes the user is joining a socket on that room id to interact with others in that room
     useEffect(() => {
         socket.emit('join-chat', `${id}`)
         apiPing()
@@ -108,6 +101,7 @@ export default function ChatRoom(props) {
     }, [id]);
 
     useEffect(() => {
+        // whenever other users send out messages they are received here immediately and updating state to show the most up to date content
         socket.on('receive-comment', (comment) => {
             console.log(comment)
             let dateNow = new Date()
